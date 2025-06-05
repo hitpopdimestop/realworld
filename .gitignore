@@ -12,3 +12,27 @@ web-build/
 
 # macOS
 .DS_Store
+
+# Server specific
+packages/server/logs/
+packages/server/prisma/dev.db
+
+# Build and cache
+build/
+.cache/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+
+# Expo
+.expo-shared/
+*.tsbundle

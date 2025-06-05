@@ -1,89 +1,89 @@
-# Project Setup Guide
+# RealWorld Monorepo
 
-Welcome to my implementation of the RealWorld application! Follow the steps below to get started and set up both the server and client parts of the application.
+This is a monorepo implementation of the RealWorld application using Yarn workspaces. The project consists of three main packages:
 
-## App Example In Expo
+- `client-expo-mobx`: React Native mobile application using MobX for state management
+- `client-expo-remx`: React Native mobile application using Remx for state management
+- `server`: Express.js backend server
 
-Install Expo app from mobile stores and scan QR code according your device:
+> This project is based on [Kisilov-Vadim/realworld](https://github.com/Kisilov-Vadim/realworld) and [antonTykhomyrovWix/realworld](https://github.com/antonTykhomyrovWix/realworld), which provided the initial implementations. We've restructured it into a monorepo format and made some improvements to the architecture.
 
-Qr Code
-:-------------------------:
-![](./assets/qr.png)
+## Getting Started
 
-## 1. Clone the Project
-
-To get started, begin by cloning this repository to your local machine.
+1. Clone the repository:
 
 ```bash
-git clone https://github.com/Kisilov-Vadim/realworld.git
+git clone https://github.com/hitpopdimestop/realworld.git
 cd realworld
 ```
 
-## 2. Set Up the Server (Just, when to work with local server, use open api, if possible)
-
-### 2.1 Install Dependencies
-
-Navigate to the server directory and install the required dependencies.
+2. Install dependencies:
 
 ```bash
-npm install
+yarn install
 ```
 
-### 2.2 Run Migrations
-
-Now that the server is set up, you need to run the database migrations. This will set up your database schema according to the defined migrations.
+3. Run database migrations (Optional - only if using the local server):
 
 ```bash
-npm run migrate:develop
+yarn server:migrate
 ```
 
-**Explanation:**
-This command runs the migration script for the development environment. It will create or update the necessary tables and schema in the database (in this case, a local SQLite file) to match the structure defined in your migration files. Running migrations ensures your database is up-to-date with the latest application changes.
+## Server
 
-### 2.3 Start the Development Server
-
-Finally, start the server in development mode by running:
+Start the server (Optional - only if using the local server):
 
 ```bash
-npm run develop
+yarn server
 ```
 
-This will start the server, and it will now be running in the development environment. You can access your server with `http://localhost:3000`.
+The server will be running at `http://localhost:3000`.
 
----
+## Client
 
-## 3. Set Up the Client
-
-Now, let's set up the client side of the project.
-
-### 3.1 Navigate to the Root of the Project
-
-Open a new terminal tab or window, and go to the root directory of the project (where the `package.json` file is located).
-
-### 3.2 Install Client Dependencies
-
-Run the following command to install the necessary client dependencies:
+To run a client application, use the interactive start script:
 
 ```bash
-npm install
+yarn start
 ```
 
-### 3.3 Open Ios Simulator
+This script will first prompt you to select which API endpoint you want the client to use (local or remote), and then which client implementation (MobX or Remx) you want to run. Follow the on-screen instructions.
 
-### 3.4 Start the Client
+After selecting the API and client, the script will launch the Expo development server for the chosen client. Use the Expo Go app on your mobile device to scan the QR code, or press 'i' for iOS simulator or 'a' for Android emulator.
 
-Finally, start the client application:
+## Development
 
-```bash
-npm start
+- Server API documentation is available at `http://localhost:3000/api`
+- The server uses SQLite for local development
+- The client is built with React Native and Expo
+
+## Project Structure
+
+```
+realworld/
+├── packages/
+│   ├── client-expo-mobx/  # React Native mobile app with MobX
+│   ├── client-expo-remx/  # React Native mobile app with Remx
+│   └── server/           # Express.js backend
+├── package.json          # Root package.json for workspace config
+└── README.md            # This file
 ```
 
----
+## Available Scripts
 
-You're all set! Happy coding! 🎉
+### Root
 
-## How to publish last changes to Expo
+- `yarn install` - Install all dependencies for all packages
+- `yarn start` - Interactive menu to choose which client to run (MobX or Remx)
+- `yarn start:mobx` - Start the MobX-based Expo development server directly
+- `yarn start:remx` - Start the Remx-based Expo development server directly
+- `yarn server` - Start the server
+- `yarn server:migrate` - Run database migrations and seed the database
 
-```sh
-eas update
-```
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
