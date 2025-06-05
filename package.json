@@ -9,8 +9,9 @@
     "start": "./start.sh",
     "start:mobx": "yarn workspace @realworld/client-expo-mobx start",
     "start:remx": "yarn workspace @realworld/client-expo-remx start",
+    "start:context": "yarn workspace @realworld/client-expo-context start",
     "server": "yarn workspace @realworld/server start",
-    "server:migrate": "yarn workspace @realworld/server migrate:develop"
+    "server:migrate": "yarn workspace @realworld/server migrate"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.17.0",
