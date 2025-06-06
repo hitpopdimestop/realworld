@@ -1,40 +1,65 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { Post, Tag } from "../types";
 import { apiClient } from "../api/client";
+import { useAuth } from "./AuthContext";
 
 interface PostsContextType {
   posts: Post[];
   tags: Tag[];
-  selectedTag: string | null;
+  selectedTags: string[];
   loading: boolean;
   error: string | null;
   fetchPosts: () => Promise<void>;
   fetchTags: () => Promise<void>;
-  selectTag: (tag: string | null) => void;
+  toggleTag: (tag: string) => void;
+  clearTags: () => void;
   fetchPostBySlug: (slug: string) => Promise<Post>;
+  updatePostFavoriteStatus: (
+    slug: string,
+    favorited: boolean,
+    favoritesCount: number
+  ) => void;
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
 
 export function PostsProvider({ children }: { children: React.ReactNode }) {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { user, isLoading: authLoading } = useAuth();
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Memoized filtered posts for better performance
+  const posts = useMemo(() => {
+    if (selectedTags.length === 0) {
+      return allPosts;
+    }
+    return allPosts.filter((post) =>
+      selectedTags.some((tag) => post.tagList.includes(tag))
+    );
+  }, [allPosts, selectedTags]);
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.getArticles(selectedTag || undefined);
-      setPosts(response.articles);
+      const response = await apiClient.getArticles();
+      setAllPosts(response.articles);
       setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch posts");
       setLoading(false);
     }
-  }, [selectedTag]);
+  }, []);
 
   const fetchTags = useCallback(async () => {
     setLoading(true);
@@ -65,24 +90,77 @@ export function PostsProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const selectTag = useCallback((tag: string | null) => {
-    setSelectedTag(tag);
+  const toggleTag = useCallback((tag: string) => {
+    setSelectedTags((current) => {
+      if (current.includes(tag)) {
+        return current.filter((t) => t !== tag);
+      } else {
+        return [...current, tag];
+      }
+    });
   }, []);
 
+  const clearTags = useCallback(() => {
+    setSelectedTags([]);
+  }, []);
+
+  const updatePostFavoriteStatus = useCallback(
+    (slug: string, favorited: boolean, favoritesCount: number) => {
+      setAllPosts((currentPosts) =>
+        currentPosts.map((post) =>
+          post.slug === slug ? { ...post, favorited, favoritesCount } : post
+        )
+      );
+    },
+    []
+  );
+
+  // Auto-fetch posts when auth state is determined
+  useEffect(() => {
+    if (!authLoading) {
+      fetchPosts();
+    }
+  }, [authLoading, fetchPosts]);
+
+  // Refetch posts when user authentication changes
+  useEffect(() => {
+    if (!authLoading && allPosts.length > 0) {
+      fetchPosts();
+    }
+  }, [user, authLoading, fetchPosts]);
+
+  const contextValue = useMemo(
+    () => ({
+      posts,
+      tags,
+      selectedTags,
+      loading: loading || authLoading,
+      error,
+      fetchPosts,
+      fetchTags,
+      toggleTag,
+      clearTags,
+      fetchPostBySlug,
+      updatePostFavoriteStatus,
+    }),
+    [
+      posts,
+      tags,
+      selectedTags,
+      loading,
+      authLoading,
+      error,
+      fetchPosts,
+      fetchTags,
+      toggleTag,
+      clearTags,
+      fetchPostBySlug,
+      updatePostFavoriteStatus,
+    ]
+  );
+
   return (
-    <PostsContext.Provider
-      value={{
-        posts,
-        tags,
-        selectedTag,
-        loading,
-        error,
-        fetchPosts,
-        fetchTags,
-        selectTag,
-        fetchPostBySlug,
-      }}
-    >
+    <PostsContext.Provider value={contextValue}>
       {children}
     </PostsContext.Provider>
   );
